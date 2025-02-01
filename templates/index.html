@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Name - Personal Website</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2d3436;
+            --accent-color: #0984e3;
+            --background-light: #f8f9fa;
+            --text-color: #2d3436;
+            --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            color: var(--text-color);
+            background-color: var(--background-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding-right: clamp(1rem, 5vw, 2rem);
+            padding-left: clamp(1rem, 5vw, 2rem);
+        }
+
+        /* Responsive typography */
+        h1 { font-size: clamp(1.5rem, 4vw, 2rem); }
+        h2 { font-size: clamp(1.25rem, 3vw, 1.5rem); }
+        .lead { font-size: clamp(0.9rem, 2vw, 1rem); }
+        p { font-size: clamp(0.875rem, 1.5vw, 1rem); }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes profileReveal {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes underlineExpand {
+            from { width: 0; }
+            to { width: clamp(30px, 5vw, 40px); }
+        }
+
+        /* Hero section */
+        .hero-section {
+            text-align: center;
+            padding: clamp(2rem, 5vw, 2.5rem) 0;
+            background: linear-gradient(180deg, #ffffff 0%, var(--background-light) 100%);
+        }
+
+        .profile-image {
+            width: clamp(100px, 15vw, 120px);
+            height: clamp(100px, 15vw, 120px);
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            opacity: 0;
+            animation: profileReveal 1s var(--transition-timing) forwards;
+        }
+
+        /* Main content */
+        .main-content {
+            padding: clamp(2rem, 5vw, 3rem) 0;
+            opacity: 0;
+            animation: fadeInUp 0.8s var(--transition-timing) forwards;
+            animation-delay: 0.2s;
+        }
+
+        /* Section headings */
+        .section-heading {
+            position: relative;
+            display: inline-block;
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+            font-weight: 500;
+        }
+
+        .section-heading::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            height: 2px;
+            background: var(--accent-color);
+            width: 0;
+            animation: underlineExpand 0.8s var(--transition-timing) forwards;
+            animation-delay: 0.5s;
+        }
+
+        /* Social links */
+        .social-links {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-links .btn {
+            transition: transform 0.3s var(--transition-timing),
+                        box-shadow 0.3s var(--transition-timing);
+            border-radius: 20px;
+            padding: clamp(0.3rem, 1vw, 0.4rem) clamp(0.8rem, 2vw, 1.2rem);
+            font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+            white-space: nowrap;
+        }
+
+        .social-links .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Content cards */
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: 100%;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            transition: transform 0.3s var(--transition-timing),
+                        box-shadow 0.3s var(--transition-timing);
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+        }
+
+        .content-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Skills and Interests */
+        .skill-item {
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: fadeInUp 0.5s var(--transition-timing) forwards;
+            font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+        }
+
+        .skill-item:nth-child(1) { animation-delay: 0.6s; }
+        .skill-item:nth-child(2) { animation-delay: 0.7s; }
+        .skill-item:nth-child(3) { animation-delay: 0.8s; }
+        .skill-item:nth-child(4) { animation-delay: 0.9s; }
+
+        /* Blog posts */
+        .post-card {
+            padding: clamp(0.8rem, 2vw, 1rem);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            opacity: 0;
+            animation: fadeInUp 0.5s var(--transition-timing) forwards;
+        }
+
+        .post-card:last-child {
+            border-bottom: none;
+        }
+
+        .post-card:nth-child(1) { animation-delay: 0.7s; }
+        .post-card:nth-child(2) { animation-delay: 0.8s; }
+        .post-card:nth-child(3) { animation-delay: 0.9s; }
+
+        .post-card h5 {
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+        }
+
+        .post-card p {
+            font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+        }
+
+        /* Post card link styles */
+        .post-card h5 a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.2s var(--transition-timing);
+        }
+
+        .post-card h5 a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            background: linear-gradient(180deg, var(--primary-color) 0%, #1e272e 100%);
+            padding: clamp(0.8rem, 2vw, 1rem) 0;
+            color: white;
+            opacity: 0;
+            animation: fadeInUp 0.8s var(--transition-timing) forwards;
+            animation-delay: 1s;
+        }
+
+        /* View All Posts button */
+        .view-all-posts {
+            display: inline-block;
+            transition: transform 0.2s var(--transition-timing);
+        }
+
+        .view-all-posts:hover {
+            transform: translateX(5px);
+        }
+
+        /* Responsive layout adjustments */
+        @media (max-width: 991px) {
+            .row {
+                --bs-gutter-x: 1.5rem;
+            }
+
+            .content-card {
+                height: auto;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .main-content .row {
+                flex-direction: column;
+            }
+
+            .col-md-7, .col-md-5 {
+                width: 100%;
+            }
+
+            .skill-interests-row {
+                gap: 1.5rem;
+            }
+
+            .social-links {
+                gap: 0.5rem;
+                padding: 0 1rem;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1140px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <img src="/api/placeholder/120/120" alt="Your Name" class="profile-image mb-3">
+            <h1 class="mb-2">Your Name</h1>
+            <p class="lead mb-3">Software Developer | Tech Enthusiast | Blogger</p>
+            <div class="social-links">
+                <a href="#" class="btn btn-outline-dark">GitHub</a>
+                <a href="#" class="btn btn-outline-dark">LinkedIn</a>
+                <a href="#" class="btn btn-outline-dark">Twitter</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Section -->
+    <section class="main-content">
+        <div class="container">
+            <div class="row g-4">
+                <!-- About Section -->
+                <div class="col-md-7">
+                    <div class="content-card">
+                        <h2 class="section-heading">About Me</h2>
+                        <p class="mb-4">
+                            Write a brief introduction about yourself here. Share your passion,
+                            expertise, and what drives you in your professional journey.
+                        </p>
+                        <div class="row skill-interests-row">
+                            <div class="col-sm-6">
+                                <h4 class="h5 mb-3">Skills</h4>
+                                <ul class="list-unstyled">
+                                    <li class="skill-item mb-2">Python Development</li>
+                                    <li class="skill-item mb-2">Web Development</li>
+                                    <li class="skill-item mb-2">Data Analysis</li>
+                                    <li class="skill-item mb-2">Machine Learning</li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-6">
+                                <h4 class="h5 mb-3">Interests</h4>
+                                <ul class="list-unstyled">
+                                    <li class="skill-item mb-2">Open Source</li>
+                                    <li class="skill-item mb-2">Tech Writing</li>
+                                    <li class="skill-item mb-2">AI/ML</li>
+                                    <li class="skill-item mb-2">Cloud Computing</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blog Section -->
+                <div class="col-md-5">
+                    <div class="content-card">
+                        <h2 class="section-heading">Latest Posts</h2>
+                        {% for post in posts %}
+                        <div class="post-card">
+                            <h5 class="mb-1">
+                                <a href="{{ url_for('view_post', post_id=post.id) }}"
+                                   class="text-decoration-none text-dark">
+                                    {{ post.title }}
+                                </a>
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                {{ post.date.strftime('%B %d, %Y') }} · {{ post.read_time }} min read
+                            </p>
+                        </div>
+                        {% endfor %}
+                        {% if posts %}
+                        <div class="text-end mt-3">
+                            <a href="{{ url_for('blog_list') }}"
+                               class="btn btn-outline-primary btn-sm view-all-posts">
+                                View All Posts
+                            </a>
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center">No posts yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-0 small">&copy; 2025 Your Name. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
