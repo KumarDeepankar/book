@@ -1,5 +1,5 @@
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, jsonify
-from datetime import datetime
 import pickle
 import os
 import uuid
@@ -33,6 +33,26 @@ class File:
             'filename': self.filename,
             'mimetype': self.mimetype,
             'upload_date': self.upload_date.isoformat()
+        }
+
+
+class Meeting:
+    def __init__(self, name, email, date, time):
+        self.id = str(uuid.uuid4())
+        self.name = name
+        self.email = email
+        self.date = date
+        self.time = time
+        self.created_at = datetime.now()
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'date': self.date,
+            'time': self.time,
+            'created_at': self.created_at.isoformat()
         }
 
 
@@ -83,6 +103,33 @@ def load_posts():
     return []
 
 
+def save_meetings(meetings):
+    with open('meetings.pickle', 'wb') as f:
+        pickle.dump(meetings, f)
+
+
+def load_meetings():
+    if os.path.exists('meetings.pickle'):
+        with open('meetings.pickle', 'rb') as f:
+            return pickle.load(f)
+    return []
+
+
+def check_overlap(meetings, new_date, new_time):
+    new_datetime = datetime.strptime(f"{new_date} {new_time}", "%Y-%m-%d %H:%M")
+
+    # Consider a meeting to be 1 hour long
+    new_end = new_datetime + timedelta(hours=1)
+
+    for meeting in meetings:
+        existing_datetime = datetime.strptime(f"{meeting.date} {meeting.time}", "%Y-%m-%d %H:%M")
+        existing_end = existing_datetime + timedelta(hours=1)
+
+        if (new_datetime < existing_end and new_end > existing_datetime):
+            return True
+    return False
+
+
 def is_allowed_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -92,7 +139,7 @@ def is_allowed_file(filename):
 def home():
     posts = load_posts()
     recent_posts = sorted(posts, key=lambda x: x.date, reverse=True)[:3]
-    return render_template('index.html', posts=recent_posts)
+    return render_template('index.html', posts=recent_posts, datetime=datetime)
 
 
 @app.route('/blog')
@@ -116,6 +163,45 @@ def view_post(post_id):
         flash('Post not found')
         return redirect(url_for('blog'))
     return render_template('blog-post.html', post=post)
+
+
+@app.route('/meetings')
+def view_meetings():
+    meetings = load_meetings()
+    sorted_meetings = sorted(meetings, key=lambda x: f"{x.date} {x.time}")
+    return render_template('meetings.html', meetings=sorted_meetings)
+
+
+@app.route('/schedule-meeting', methods=['POST'])
+def schedule_meeting():
+    data = request.form
+    name = data.get('name')
+    email = data.get('email')
+    date = data.get('date')
+    time = data.get('time')
+
+    if not all([name, email, date, time]):
+        return jsonify({'error': 'All fields are required'}), 400
+
+    # Validate date and time
+    try:
+        meeting_datetime = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
+        if meeting_datetime < datetime.now():
+            return jsonify({'error': 'Cannot schedule meetings in the past'}), 400
+    except ValueError:
+        return jsonify({'error': 'Invalid date or time format'}), 400
+
+    meetings = load_meetings()
+
+    # Check for overlaps
+    if check_overlap(meetings, date, time):
+        return jsonify({'error': 'This time slot is already booked'}), 400
+
+    new_meeting = Meeting(name, email, date, time)
+    meetings.append(new_meeting)
+    save_meetings(meetings)
+
+    return jsonify({'message': 'Meeting scheduled successfully'})
 
 
 @app.route('/blog/file/<post_id>/<file_id>')
@@ -199,15 +285,6 @@ def edit_post(post_id):
     return redirect(url_for('blog'))
 
 
-@app.route('/blog/files/<post_id>')
-def get_post_files(post_id):
-    posts = load_posts()
-    post = next((post for post in posts if post.id == post_id), None)
-    if post and post.files:
-        return jsonify([file.to_dict() for file in post.files])
-    return jsonify([])
-
-
 @app.route('/blog/delete/<post_id>', methods=['POST'])
 def delete_post(post_id):
     posts = load_posts()
@@ -216,6 +293,16 @@ def delete_post(post_id):
 
     flash('Post deleted successfully')
     return redirect(url_for('blog'))
+
+
+@app.route('/meeting/delete/<meeting_id>', methods=['POST'])
+def delete_meeting(meeting_id):
+    meetings = load_meetings()
+    meetings = [meeting for meeting in meetings if meeting.id != meeting_id]
+    save_meetings(meetings)
+
+    flash('Meeting deleted successfully')
+    return redirect(url_for('view_meetings'))
 
 
 if __name__ == '__main__':

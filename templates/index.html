@@ -329,6 +329,7 @@ footer {
                 <a href="#" class="btn btn-outline-dark">GitHub</a>
                 <a href="#" class="btn btn-outline-dark">LinkedIn</a>
                 <a href="#" class="btn btn-outline-dark">Twitter</a>
+                <button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#scheduleModal">Schedule Meeting</button>
             </div>
         </div>
     </section>
@@ -401,6 +402,44 @@ footer {
         </div>
     </section>
 
+    <!-- Schedule Meeting Modal -->
+    <div class="modal fade" id="scheduleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule a Meeting</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="scheduleForm" onsubmit="event.preventDefault(); handleScheduleSubmit();">
+                    <div class="modal-body">
+                        <div class="alert alert-danger d-none" id="scheduleError"></div>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" required
+                                   min="{{ datetime.now().strftime('%Y-%m-%d') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Time</label>
+                            <input type="time" name="time" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Schedule</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="text-center">
         <div class="container">
@@ -408,6 +447,71 @@ footer {
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    async function handleScheduleSubmit() {
+        const form = document.getElementById('scheduleForm');
+        const errorDiv = document.getElementById('scheduleError');
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('/schedule-meeting', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                errorDiv.textContent = data.error;
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+
+            alert('Meeting scheduled successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('scheduleModal')).hide();
+            form.reset();
+            errorDiv.classList.add('d-none');
+        } catch (error) {
+            errorDiv.textContent = 'An error occurred. Please try again.';
+            errorDiv.classList.remove('d-none');
+        }
+    }
+
+    // Add date input validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.querySelector('input[type="date"]');
+        const timeInput = document.querySelector('input[type="time"]');
+
+        // Set minimum date to today
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        dateInput.min = formattedDate;
+
+        // Validate selected time when date is today
+        dateInput.addEventListener('change', validateDateTime);
+        timeInput.addEventListener('change', validateDateTime);
+
+        function validateDateTime() {
+            if (dateInput.value === formattedDate) {
+                const now = new Date();
+                const selectedTime = timeInput.value;
+                if (selectedTime) {
+                    const [hours, minutes] = selectedTime.split(':');
+                    const selectedDateTime = new Date();
+                    selectedDateTime.setHours(hours, minutes);
+
+                    if (selectedDateTime < now) {
+                        timeInput.setCustomValidity('Please select a future time');
+                        return false;
+                    }
+                }
+            }
+            timeInput.setCustomValidity('');
+            return true;
+        }
+    });
+    </script>
 </body>
 </html>
