@@ -6,6 +6,85 @@
     <title>{{ post.title }} - Your Name</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    <style>
+        .chapter-index {
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+        .chapter-index .list-group-item {
+            border: none;
+            padding: 0.5rem 1rem;
+        }
+        .chapter-index .list-group-item.active {
+            background-color: #f8f9fa;
+            color: #0d6efd;
+            font-weight: 500;
+        }
+        .blog-content h2 {
+            scroll-margin-top: 2rem;
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+        .blog-content img {
+            max-width: 100%;
+            height: auto;
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+        .blog-content img:hover {
+            transform: scale(1.02);
+        }
+        #imageModal .modal-dialog {
+            max-width: 90vw;
+            max-height: 90vh;
+            margin: 1rem auto;
+        }
+        #imageModal .modal-content {
+            background: transparent;
+            border: none;
+        }
+        #imageModal .modal-body {
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #imageModal img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+        .zoom-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 20px;
+            z-index: 1060;
+        }
+        .zoom-controls button {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+        .zoom-controls button:hover {
+            color: #0d6efd;
+        }
+        @media (max-width: 991.98px) {
+            .chapter-index {
+                position: relative;
+                max-height: none;
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
@@ -28,20 +107,61 @@
     </nav>
 
     <main class="container py-5">
-        <article class="blog-content">
-            <div class="content-wrapper">
+        <div class="row">
+            <!-- Article Header -->
+            <div class="col-12 mb-4">
                 <h1 class="mb-3">{{ post.title }}</h1>
                 <div class="blog-meta mb-4">
                     <span>{{ post.date.strftime('%B %d, %Y') }}</span>
                     <span class="mx-2">·</span>
                     <span>{{ post.read_time }} min read</span>
                 </div>
-                <div class="blog-content">
+            </div>
+
+            <!-- Chapter Index Sidebar -->
+            <div class="col-lg-3 order-lg-2">
+                {% if post.chapters %}
+                <div class="chapter-index">
+                    <h4 class="h5 mb-3">Table of Contents</h4>
+                    <div class="list-group list-group-flush" id="chapterList">
+                        {% for chapter in post.chapters %}
+                        <a href="#{{ chapter.id }}"
+                           class="list-group-item list-group-item-action"
+                           data-chapter="{{ chapter.id }}">
+                            {{ chapter.number }}. {{ chapter.title }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 order-lg-1">
+                <article class="blog-content">
                     {{ post.content|safe }}
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <!-- Image Zoom Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="" id="zoomedImage" alt="Zoomed image">
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
             </div>
-        </article>
-    </main>
+        </div>
+        <div class="zoom-controls">
+            <button onclick="zoomIn()">+</button>
+            <button onclick="resetZoom()">Reset</button>
+            <button onclick="zoomOut()">-</button>
+        </div>
+    </div>
 
     <footer class="bg-light mt-5 py-3">
         <div class="container text-center">
@@ -50,5 +170,81 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize image zoom functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+            const zoomedImage = document.getElementById('zoomedImage');
+            let currentScale = 1;
+
+            // Add click handlers to all images in the blog content
+            document.querySelectorAll('.blog-content img').forEach(img => {
+                img.addEventListener('click', function() {
+                    zoomedImage.src = this.src;
+                    currentScale = 1;
+                    zoomedImage.style.transform = `scale(${currentScale})`;
+                    imageModal.show();
+                });
+            });
+
+            // Reset zoom when modal is closed
+            document.getElementById('imageModal').addEventListener('hidden.bs.modal', function () {
+                currentScale = 1;
+                zoomedImage.style.transform = `scale(${currentScale})`;
+            });
+
+            // Expose zoom functions to global scope
+            window.zoomIn = function() {
+                currentScale = Math.min(currentScale + 0.2, 3);
+                zoomedImage.style.transform = `scale(${currentScale})`;
+            };
+
+            window.zoomOut = function() {
+                currentScale = Math.max(currentScale - 0.2, 0.5);
+                zoomedImage.style.transform = `scale(${currentScale})`;
+            };
+
+            window.resetZoom = function() {
+                currentScale = 1;
+                zoomedImage.style.transform = `scale(${currentScale})`;
+            };
+        });
+
+        // Chapter navigation code
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('#chapterList .list-group-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+
+                        const chapterLink = document.querySelector(`#chapterList [data-chapter="${entry.target.id}"]`);
+                        if (chapterLink) {
+                            chapterLink.classList.add('active');
+                        }
+                    }
+                });
+            }, {
+                threshold: 0.2,
+                rootMargin: '-20% 0px -80% 0px'
+            });
+
+            document.querySelectorAll('.blog-content h2').forEach(heading => {
+                observer.observe(heading);
+            });
+
+            document.querySelectorAll('#chapterList .list-group-item').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
