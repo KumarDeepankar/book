@@ -6,149 +6,265 @@
     <title>YouTube Library - Kumar Deepankar</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            min-height: 100vh;
-        }
+   <style>
+         /* Base styles for both libraries */
+body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    min-height: 100vh;
+}
 
-        .library-header {
-            padding: 2rem 0;
-            background: linear-gradient(160deg, #ffffff 0%, #f8f9fa 100%);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            margin-bottom: 2rem;
-        }
+.library-header {
+    padding: 2rem 0;
+    background: linear-gradient(160deg, #ffffff 0%, #f8f9fa 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
 
-        .resource-card {
-            height: 100%;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            overflow: hidden;
-        }
+/* Filter Section Styles */
+.filter-section {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05),
+                0 4px 12px rgba(0, 0, 0, 0.02);
+    position: sticky;
+    top: 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    transition: box-shadow 0.3s ease;
+}
 
-        .resource-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+.filter-section:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06),
+                0 6px 16px rgba(0, 0, 0, 0.03);
+}
 
-        .video-thumbnail {
-            position: relative;
-            padding-top: 56.25%; /* 16:9 Aspect Ratio */
-            background: #f8f9fa;
-            overflow: hidden;
-        }
+/* Filter Header */
+.filter-section h5 {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #4b5563;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-        .video-thumbnail img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
+.filter-section h5::before {
+    content: '';
+    display: block;
+    width: 12px;
+    height: 2px;
+    background: currentColor;
+    opacity: 0.5;
+}
 
-        .video-thumbnail:hover img {
-            transform: scale(1.05);
-        }
+/* Filter Groups */
+.filter-group {
+    position: relative;
+    margin-bottom: 1rem;
+}
 
-        .play-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 3rem;
-            color: white;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            opacity: 0.9;
-            transition: opacity 0.3s ease;
-        }
+.filter-group:last-child {
+    margin-bottom: 0;
+}
 
-        .video-thumbnail:hover .play-icon {
-            opacity: 1;
-        }
+/* Labels */
+.filter-group label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+    display: block;
+    transition: color 0.2s ease;
+}
 
-        .tag {
-            font-size: 0.8rem;
-            padding: 0.2rem 0.5rem;
-            background: rgba(13, 110, 253, 0.1);
-            color: #0d6efd;
-            border-radius: 4px;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-            display: inline-block;
-        }
+.filter-group:focus-within label {
+    color: #3b82f6;
+}
 
-        .filter-section {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            position: sticky;
-            top: 1rem;
-        }
+/* Form Controls */
+.filter-group .form-control,
+.filter-group .form-select {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+    width: 100%;
+    color: #374151;
+}
 
-        .resource-type-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            z-index: 1;
-        }
+.filter-group .form-control:hover,
+.filter-group .form-select:hover {
+    border-color: #d1d5db;
+    background-color: #f3f4f6;
+}
 
-        .resource-type-badge.video {
-            background: rgba(220, 53, 69, 0.9);
-            color: white;
-        }
+.filter-group .form-control:focus,
+.filter-group .form-select:focus {
+    background-color: #fff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
 
-        .resource-type-badge.channel {
-            background: rgba(13, 110, 253, 0.9);
-            color: white;
-        }
+/* Search Input Specific Styles */
+.filter-group .search-input-wrapper {
+    position: relative;
+}
 
-        .channel-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 1rem;
-        }
+.filter-group .search-input {
+    padding-right: 2.5rem;
+}
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-        }
+.filter-group .search-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
 
-        .empty-state-icon {
-            font-size: 4rem;
-            color: #dee2e6;
-            margin-bottom: 1rem;
-        }
+.filter-group .form-control:focus + .search-icon {
+    color: #3b82f6;
+}
 
-        /* Flash messages styling */
-        .flash-messages {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
+/* Select Inputs */
+.filter-group .form-select {
+    padding-right: 2rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    appearance: none;
+}
 
-        .alert {
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-        }
+/* Placeholders */
+.filter-group .form-control::placeholder {
+    color: #9ca3af;
+    opacity: 1;
+}
+
+/* Tags Container */
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.tag:hover {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+/* Responsive Adjustments */
+@media (min-width: 992px) {
+    .filter-section {
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .filter-section {
+        position: relative;
+        top: 0;
+        max-width: none;
+        margin-bottom: 2rem;
+    }
+
+    .filter-group {
+        margin-bottom: 0.75rem;
+    }
+}
+
+/* Resource Grid Layout */
+.resource-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+@media (max-width: 640px) {
+    .resource-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animation for Filter Changes */
+.resource-item {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.resource-item.filtering {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+/* Clear Filters Button */
+.clear-filters {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 1rem;
+    padding: 0.25rem 0;
+    transition: color 0.2s ease;
+}
+
+.clear-filters:hover {
+    color: #3b82f6;
+}
+
+.clear-filters i {
+    font-size: 1rem;
+}
+
+/* Active Filter Indicators */
+.filter-group.has-active-filter label::after {
+    content: '•';
+    color: #3b82f6;
+    margin-left: 0.25rem;
+}
+
+/* Loading State */
+.filter-section.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.filter-section.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(2px);
+}
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('home') }}">Kumar Deepankar</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -177,10 +293,14 @@
     <div class="library-header">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h2 mb-0">YouTube Library</h1>
+                <div>
+                    <h1 class="h2 mb-0">YouTube Library</h1>
+                    <p class="text-muted mb-0 mt-1">Curated video resources</p>
+                </div>
                 {% if session.get('authenticated') %}
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResourceModal">
-                    <i class="bi bi-plus-lg me-2"></i>Add Resource
+                <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addResourceModal">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>Add Resource</span>
                 </button>
                 {% endif %}
             </div>
@@ -207,13 +327,20 @@
             <!-- Filters Sidebar -->
             <div class="col-lg-3 mb-4">
                 <div class="filter-section">
-                    <h5 class="mb-3">Filters</h5>
-                    <div class="mb-3">
-                        <label class="form-label">Search</label>
-                        <input type="text" class="form-control" id="searchInput" placeholder="Search resources...">
+                    <h5 class="d-flex align-items-center gap-2">
+                        <i class="bi bi-funnel"></i>
+                        Filters
+                    </h5>
+                    <div class="filter-group">
+                        <div class="search-input-wrapper">
+                            <input type="text"
+                                   class="form-control search-input"
+                                   id="searchInput"
+                                   placeholder="Search resources...">
+                            <i class="bi bi-search search-icon"></i>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Type</label>
+                    <div class="filter-group">
                         <select class="form-select" id="typeFilter">
                             <option value="">All Types</option>
                             <option value="video">Videos</option>
@@ -221,8 +348,7 @@
                         </select>
                     </div>
                     {% if categories %}
-                    <div class="mb-3">
-                        <label class="form-label">Category</label>
+                    <div class="filter-group">
                         <select class="form-select" id="categoryFilter">
                             <option value="">All Categories</option>
                             {% for category in categories %}
@@ -231,74 +357,83 @@
                         </select>
                     </div>
                     {% endif %}
-                    <div class="mb-3">
-                        <label class="form-label">Sort By</label>
+                    <div class="filter-group">
                         <select class="form-select" id="sortFilter">
                             <option value="date-desc">Newest First</option>
                             <option value="date-asc">Oldest First</option>
-                            <option value="title">Title</option>
+                            <option value="title">Title A-Z</option>
                         </select>
                     </div>
+                    <a href="#" class="clear-filters" onclick="clearFilters()">
+                        <i class="bi bi-x-circle"></i>
+                        Clear filters
+                    </a>
                 </div>
             </div>
 
             <!-- Resource Grid -->
             <div class="col-lg-9">
-                <div class="row g-4" id="resourceGrid">
+                <div class="resource-grid" id="resourceGrid">
                     {% if resources %}
                         {% for resource in resources %}
-                        <div class="col-md-6 resource-item"
+                        <div class="resource-item"
                              data-title="{{ resource.title }}"
                              data-category="{{ resource.category or '' }}"
                              data-type="{{ resource.resource_type }}"
                              data-date="{{ resource.added_date.isoformat() }}">
-                            <div class="card resource-card">
-                                {% if resource.resource_type == 'video' %}
-                                    <div class="video-thumbnail">
-                                        <span class="resource-type-badge video">Video</span>
-                                        <img src="/api/placeholder/640/360" alt="Video thumbnail">
-                                        <i class="bi bi-play-circle-fill play-icon"></i>
-                                    </div>
-                                {% endif %}
+                            <div class="card resource-card h-100">
                                 <div class="card-body">
-                                    {% if resource.resource_type == 'channel' %}
-                                        <span class="resource-type-badge channel">Channel</span>
-                                        <div class="d-flex align-items-center mb-3">
-                                            <img src="/api/placeholder/48/48" alt="Channel icon" class="channel-icon">
-                                            <h5 class="card-title mb-0">{{ resource.title }}</h5>
-                                        </div>
-                                    {% else %}
-                                        <h5 class="card-title">{{ resource.title }}</h5>
-                                    {% endif %}
+                                    <div class="d-flex align-items-start gap-2 mb-3">
+                                        {% if resource.resource_type == 'video' %}
+                                            <i class="bi bi-play-btn-fill text-danger fs-3"></i>
+                                            <div>
+                                                <h5 class="card-title mb-0">{{ resource.title }}</h5>
+                                                <span class="badge bg-danger mt-1">Video</span>
+                                            </div>
+                                        {% else %}
+                                            <i class="bi bi-collection-play fs-3 text-primary"></i>
+                                            <div>
+                                                <h5 class="card-title mb-0">{{ resource.title }}</h5>
+                                                <span class="badge bg-primary mt-1">Channel</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
                                     <p class="card-text text-muted small mb-2">
-                                        Added on {{ resource.added_date.strftime('%B %d, %Y') }}
+                                        Added {{ resource.added_date.strftime('%B %d, %Y') }}
                                     </p>
+
                                     {% if resource.category %}
-                                    <p class="card-text text-muted small mb-2">
-                                        Category: {{ resource.category }}
-                                    </p>
+                                    <div class="mb-2">
+                                        <span class="badge bg-light text-dark">{{ resource.category }}</span>
+                                    </div>
                                     {% endif %}
+
                                     <p class="card-text mb-3">{{ resource.description }}</p>
+
                                     {% if resource.tags %}
-                                    <div class="mb-3">
+                                    <div class="tags-container mb-3">
                                         {% for tag in resource.tags %}
                                         <span class="tag">{{ tag }}</span>
                                         {% endfor %}
                                     </div>
                                     {% endif %}
-                                    <div class="d-flex justify-content-between align-items-center">
+
+                                    <div class="d-flex justify-content-between align-items-center mt-auto">
                                         <a href="{{ resource.url }}"
-                                           class="btn btn-primary btn-sm"
+                                           class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
                                            target="_blank">
-                                            <i class="bi bi-box-arrow-up-right me-1"></i>Open
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                            <span>Open</span>
                                         </a>
                                         {% if session.get('authenticated') %}
                                         <form action="{{ url_for('delete_youtube_resource', resource_id=resource.id) }}"
                                               method="POST"
-                                              onsubmit="return confirm('Are you sure you want to delete this resource?')"
-                                              class="d-inline">
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash me-1"></i>Delete
+                                              class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this resource?')">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+                                                <i class="bi bi-trash"></i>
+                                                <span>Delete</span>
                                             </button>
                                         </form>
                                         {% endif %}
@@ -380,74 +515,136 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const typeFilter = document.getElementById('typeFilter');
-            const categoryFilter = document.getElementById('categoryFilter');
-            const sortFilter = document.getElementById('sortFilter');
-            const resourceItems = document.querySelectorAll('.resource-item');
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get filter elements with null checks
+    const searchInput = document.querySelector('#searchInput');
+    const typeFilter = document.querySelector('#typeFilter');
+    const categoryFilter = document.querySelector('#categoryFilter');
+    const sortFilter = document.querySelector('#sortFilter');
+    const resourceGrid = document.querySelector('#pdfGrid, #resourceGrid'); // Works for both libraries
 
-            function filterResources() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const selectedType = typeFilter.value.toLowerCase();
-                const selectedCategory = categoryFilter.value.toLowerCase();
-                const sortValue = sortFilter.value;
+    function filterResources() {
+        if (!resourceGrid) return; // Exit if grid not found
 
-                // Convert NodeList to Array for sorting
-                const itemsArray = Array.from(resourceItems);
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        const selectedType = typeFilter ? typeFilter.value.toLowerCase() : '';
+        const selectedCategory = categoryFilter ? categoryFilter.value.toLowerCase() : '';
+        const sortValue = sortFilter ? sortFilter.value : 'date-desc';
 
-                // Sort items
-                itemsArray.sort((a, b) => {
-                    if (sortValue === 'title') {
-                        const titleA = a.getAttribute('data-title').toLowerCase();
-                        const titleB = b.getAttribute('data-title').toLowerCase();
-                        return titleA.localeCompare(titleB);
-                    } else {
-                        const dateA = new Date(a.getAttribute('data-date'));
-                        const dateB = new Date(b.getAttribute('data-date'));
-                        return sortValue === 'date-desc' ? dateB - dateA : dateA - dateB;
-                    }
-                });
+        const items = resourceGrid.querySelectorAll('.resource-item');
+        if (!items.length) return; // Exit if no items
 
-                // Filter and show/hide items
-                itemsArray.forEach(item => {
-                    const title = item.getAttribute('data-title').toLowerCase();
-                    const type = item.getAttribute('data-type').toLowerCase();
-                    const category = item.getAttribute('data-category').toLowerCase();
+        // Convert NodeList to Array for sorting
+        const itemsArray = Array.from(items);
 
-                    const matchesSearch = title.includes(searchTerm);
-                    const matchesType = !selectedType || type === selectedType;
-                    const matchesCategory = !selectedCategory || category === selectedCategory;
-
-                    if (matchesSearch && matchesType && matchesCategory) {
-                        item.style.display = '';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-
-                // Reorder items in the DOM
-                const container = document.getElementById('resourceGrid');
-                itemsArray.forEach(item => container.appendChild(item));
+        // Sort items
+        itemsArray.sort((a, b) => {
+            if (sortValue === 'title') {
+                const titleA = a.getAttribute('data-title')?.toLowerCase() || '';
+                const titleB = b.getAttribute('data-title')?.toLowerCase() || '';
+                return titleA.localeCompare(titleB);
+            } else {
+                const dateA = new Date(a.getAttribute('data-date') || '');
+                const dateB = new Date(b.getAttribute('data-date') || '');
+                return sortValue === 'date-desc' ? dateB - dateA : dateA - dateB;
             }
+        });
 
-            // Add event listeners
-            searchInput.addEventListener('input', filterResources);
-            typeFilter.addEventListener('change', filterResources);
-            categoryFilter.addEventListener('change', filterResources);
-            sortFilter.addEventListener('change', filterResources);
+        // Filter and show/hide items
+        itemsArray.forEach(item => {
+            const title = item.getAttribute('data-title')?.toLowerCase() || '';
+            const type = item.getAttribute('data-type')?.toLowerCase() || '';
+            const category = item.getAttribute('data-category')?.toLowerCase() || '';
 
-            // Setup flash message auto-dismiss
-            setTimeout(function() {
-                document.querySelectorAll('.alert').forEach(alert => {
+            const matchesSearch = !searchTerm || title.includes(searchTerm);
+            const matchesType = !selectedType || type === selectedType;
+            const matchesCategory = !selectedCategory || category === selectedCategory;
+
+            if (matchesSearch && matchesType && matchesCategory) {
+                item.style.display = '';
+                item.classList.remove('filtering');
+            } else {
+                item.style.display = 'none';
+                item.classList.add('filtering');
+            }
+        });
+
+        // Reorder items in the DOM
+        itemsArray.forEach(item => resourceGrid.appendChild(item));
+
+        // Update empty state
+        updateEmptyState();
+    }
+
+    function updateEmptyState() {
+        const visibleItems = resourceGrid.querySelectorAll('.resource-item:not([style*="display: none"])');
+        const existingEmptyState = resourceGrid.querySelector('.empty-state-container');
+
+        if (visibleItems.length === 0) {
+            if (!existingEmptyState) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state-container col-12';
+                emptyState.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-search empty-state-icon d-block"></i>
+                        <h4>No Results Found</h4>
+                        <p class="text-muted">Try adjusting your filters</p>
+                        <button onclick="clearFilters()" class="btn btn-outline-primary btn-sm mt-2">
+                            Clear Filters
+                        </button>
+                    </div>
+                `;
+                resourceGrid.appendChild(emptyState);
+            }
+        } else if (existingEmptyState) {
+            existingEmptyState.remove();
+        }
+    }
+
+    function clearFilters() {
+        if (searchInput) searchInput.value = '';
+        if (typeFilter) typeFilter.value = '';
+        if (categoryFilter) categoryFilter.value = '';
+        if (sortFilter) sortFilter.value = 'date-desc';
+
+        filterResources();
+    }
+
+    // Attach event listeners with null checks
+    if (searchInput) {
+        searchInput.addEventListener('input', filterResources);
+    }
+    if (typeFilter) {
+        typeFilter.addEventListener('change', filterResources);
+    }
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', filterResources);
+    }
+    if (sortFilter) {
+        sortFilter.addEventListener('change', filterResources);
+    }
+
+    // Make clearFilters function globally available
+    window.clearFilters = clearFilters;
+
+    // Handle flash messages
+    const flashMessages = document.querySelectorAll('.alert');
+    if (flashMessages.length) {
+        setTimeout(() => {
+            flashMessages.forEach(alert => {
+                if (alert && typeof bootstrap !== 'undefined') {
                     const bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
-                });
-            }, 5000);
-        });
-    </script>
+                }
+            });
+        }, 5000);
+    }
+
+    // Initialize filters
+    filterResources();
+});
+</script>
 </body>
 </html>
