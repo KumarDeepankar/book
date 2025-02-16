@@ -212,24 +212,31 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('home') }}">Kumar Deepankar</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('blog_list') }}">Blog</a>
-                    </li>
-                </ul>
-            </div>
+<!-- Update the navbar section in blog-post.html -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('home') }}">Kumar Deepankar</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('blog_list') }}">Blog</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('pdf_library') }}">PDF Library</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('youtube_library') }}">YouTube Library</a>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <div class="blog-header">
         <div class="container">
