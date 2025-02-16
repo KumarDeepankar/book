@@ -79,6 +79,9 @@
         .ql-editor {
             min-height: 100%;
             padding-bottom: 100px;
+            white-space: pre-wrap !important;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         /* Editor content styling */
@@ -104,6 +107,7 @@
         .ql-editor p {
             margin-bottom: 0.4rem;
             line-height: 1.5;
+            white-space: pre-wrap !important;
         }
 
         .ql-editor img {
@@ -146,6 +150,24 @@
             top: 20px;
             right: 20px;
             z-index: 1050;
+        }
+
+        /* Code block styling */
+        .ql-editor pre {
+            background: #2d3748;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            margin: 1.5rem 0;
+        }
+
+        .ql-editor code {
+            background: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: #e83e8c;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -313,129 +335,235 @@
         </div>
     </div>
 <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Quill editor configuration
-            const toolbarOptions = [
-                [{ 'header': [false, 2, 3] }],  // Changed this line to include h3
-                ['bold', 'italic', 'underline', 'strike'],
-                ['blockquote', 'code-block'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'script': 'sub'}, { 'script': 'super' }],
-                [{ 'indent': '-1'}, { 'indent': '+1' }],
-                [{ 'direction': 'rtl' }],
-                [{ 'size': ['small', false, 'large', 'huge'] }],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'align': [] }],
-                ['link', 'image'],
-                ['clean']
-            ];
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.min.js"></script>
+<script>
+    let quill, editQuill; // Declare editors at a higher scope
 
-            const quillConfig = {
-                theme: 'snow',
-                modules: {
-                    toolbar: toolbarOptions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the editors
+        initializeEditors();
+        // Setup other functionality
+        setupFormHandlers();
+        setupFileHandlers();
+        setupFlashMessages();
+    });
+
+    function initializeEditors() {
+        // Quill editor configuration
+        const toolbarOptions = [
+            [{ 'header': [false, 2, 3] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'script': 'sub'}, { 'script': 'super' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{ 'direction': 'rtl' }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'align': [] }],
+            ['link', 'image'],
+            ['clean']
+        ];
+
+        const quillConfig = {
+            theme: 'snow',
+            modules: {
+                toolbar: toolbarOptions,
+                clipboard: {
+                    matchVisual: false
                 },
-                placeholder: 'Write your post content here...'
-            };
+                keyboard: {
+                    bindings: {
+                        tab: {
+                            key: 9,
+                            handler: function(range, context) {
+                                const indent = '    '; // 4 spaces for tab
+                                this.quill.insertText(range.index, indent, 'user');
+                                this.quill.setSelection(range.index + indent.length);
+                                return false;
+                            }
+                        },
+                        'indent backwards': {
+                            key: 9,
+                            shiftKey: true,
+                            handler: function(range, context) {
+                                // Handle shift+tab to remove indentation
+                                return true;
+                            }
+                        }
+                    }
+                }
+            },
+            formats: [
+                'header',
+                'bold', 'italic', 'underline', 'strike',
+                'blockquote', 'code-block',
+                'list', 'bullet',
+                'script',
+                'indent',
+                'direction',
+                'size',
+                'color', 'background',
+                'align',
+                'link', 'image',
+                'clean'
+            ],
+            placeholder: 'Write your post content here...'
+        };
 
-            // Initialize the editors
-            window.quill = new Quill('#editor', quillConfig);
-            window.editQuill = new Quill('#editEditor', quillConfig);
+        // Initialize both editors
+        quill = new Quill('#editor', quillConfig);
+        editQuill = new Quill('#editEditor', quillConfig);
 
-            // Add custom formats
-            const headerConfig = {
-                '2': { tag: 'h2', class: 'chapter-heading' },
-                '3': { tag: 'h3', class: 'subheading' }
-            };
-
-            // Setup form handlers
-            setupFormHandlers();
-            setupImageHandling();
+        // Set styles for both editors
+        [quill, editQuill].forEach(editor => {
+            if (editor && editor.container) {
+                const editorElement = editor.container.querySelector('.ql-editor');
+                if (editorElement) {
+                    editorElement.style.cssText = `
+                        white-space: pre-wrap !important;
+                        tab-size: 4;
+                        -moz-tab-size: 4;
+                    `;
+                }
+            }
         });
 
-        function setupFormHandlers() {
-            // New post form submission
-            const newPostForm = document.getElementById('newPostForm');
-            if (newPostForm) {
-                newPostForm.onsubmit = function() {
-                    const content = window.quill.root.innerHTML;
-                    document.getElementById('hiddenContent').value = formatContent(content);
-                    return true;
-                };
-            }
+        // Setup clipboard handlers for both editors
+        [quill, editQuill].forEach(setupClipboardHandler);
+    }
 
-            // Edit post form submission
-            const editPostForm = document.getElementById('editPostForm');
-            if (editPostForm) {
-                editPostForm.onsubmit = function() {
-                    const content = window.editQuill.root.innerHTML;
-                    document.getElementById('editHiddenContent').value = formatContent(content);
-                    return true;
-                };
-            }
-        }
+    function setupClipboardHandler(editor) {
+        if (!editor || !editor.clipboard) return;
 
-        function formatContent(content) {
-            const temp = document.createElement('div');
-            temp.innerHTML = content;
-
-            // Process all h2 elements (chapters)
-            temp.querySelectorAll('h2').forEach((h2, index) => {
-                h2.id = `chapter-${index + 1}`;
-                h2.classList.add('chapter-heading');
+        editor.clipboard.addMatcher('p', function(node, delta) {
+            // Preserve leading spaces
+            const text = node.innerText || node.textContent;
+            delta.ops = delta.ops.map(op => {
+                if (op.insert && typeof op.insert === 'string') {
+                    // Replace leading spaces with non-breaking spaces
+                    op.insert = op.insert.replace(/^( +)/gm, match =>
+                        '\u00A0'.repeat(match.length)
+                    );
+                }
+                return op;
             });
+            return delta;
+        });
 
-            // Process all h3 elements (subheadings)
-            temp.querySelectorAll('h3').forEach((h3, index) => {
-                const parentChapter = h3.closest('h2');
-                const chapterIndex = Array.from(temp.querySelectorAll('h2')).indexOf(parentChapter) + 1;
-                h3.id = `subheading-${chapterIndex}-${index + 1}`;
-                h3.classList.add('subheading');
-            });
+        editor.clipboard.addMatcher('pre', function(node, delta) {
+            // Preserve formatting in code blocks
+            return handleCodePaste(node, delta);
+        });
+    }
 
-            return temp.innerHTML;
-        }
+    function handleCodePaste(node, delta) {
+        const text = node.innerText || node.textContent;
+        return {
+            ops: [
+                { insert: text },
+                { insert: '\n', attributes: { 'code-block': true } }
+            ]
+        };
+    }
 
-
-    // Setup form handlers
     function setupFormHandlers() {
         // New post form submission
         const newPostForm = document.getElementById('newPostForm');
         if (newPostForm) {
-            newPostForm.onsubmit = function() {
-                const content = window.quill.root.innerHTML;
-                document.getElementById('hiddenContent').value = formatContent(content);
-                return true;
+            newPostForm.onsubmit = function(e) {
+                try {
+                    const content = quill.root.innerHTML;
+                    document.getElementById('hiddenContent').value = formatContent(content);
+                    return true;
+                } catch (error) {
+                    console.error('Error in new post submission:', error);
+                    e.preventDefault();
+                    return false;
+                }
             };
         }
 
         // Edit post form submission
         const editPostForm = document.getElementById('editPostForm');
         if (editPostForm) {
-            editPostForm.onsubmit = function() {
-                const content = window.editQuill.root.innerHTML;
-                document.getElementById('editHiddenContent').value = formatContent(content);
-                return true;
+            editPostForm.onsubmit = function(e) {
+                try {
+                    const content = editQuill.root.innerHTML;
+                    document.getElementById('editHiddenContent').value = formatContent(content);
+                    return true;
+                } catch (error) {
+                    console.error('Error in edit post submission:', error);
+                    e.preventDefault();
+                    return false;
+                }
             };
         }
+    }
 
-        // File input preview
+    function formatContent(content) {
+        const temp = document.createElement('div');
+        temp.innerHTML = content;
+
+        // Process all paragraphs
+        temp.querySelectorAll('p').forEach(p => {
+            p.style.whiteSpace = 'pre-wrap';
+            // Preserve leading spaces by converting to non-breaking spaces
+            const text = p.innerHTML;
+            const preservedText = text.replace(/^( +)/gm, spaces =>
+                '\u00A0'.repeat(spaces.length)
+            );
+            p.innerHTML = preservedText;
+        });
+
+        // Process all pre and code elements
+        temp.querySelectorAll('pre, code').forEach(element => {
+            element.style.whiteSpace = 'pre-wrap';
+            element.style.tabSize = '4';
+        });
+
+        // Process headings (chapters and subheadings)
+        temp.querySelectorAll('h2').forEach((h2, index) => {
+            h2.id = `chapter-${index + 1}`;
+            h2.classList.add('chapter-heading');
+        });
+
+        temp.querySelectorAll('h3').forEach((h3, index) => {
+            const parentH2 = h3.closest('h2');
+            const chapterIndex = Array.from(temp.querySelectorAll('h2')).indexOf(parentH2) + 1;
+            h3.id = `subheading-${chapterIndex}-${index + 1}`;
+            h3.classList.add('subheading');
+        });
+
+        return temp.innerHTML;
+    }
+
+    function setupFileHandlers() {
         document.querySelectorAll('input[type="file"]').forEach(input => {
             input.addEventListener('change', function() {
-                const previewContainer = this.nextElementSibling;
-                if (previewContainer && previewContainer.classList.contains('file-preview')) {
-                    previewContainer.innerHTML = Array.from(this.files)
-                        .map(file => `<div class="file-preview-item">${file.name}</div>`)
+                const previewContainer = this.closest('.file-upload-section').querySelector('.file-preview');
+                if (previewContainer) {
+                    const files = Array.from(this.files);
+                    const validFiles = files.filter(file => {
+                        const ext = file.name.split('.').pop().toLowerCase();
+                        return ['png', 'jpg', 'jpeg', 'gif', 'pdf'].includes(ext);
+                    });
+
+                    previewContainer.innerHTML = validFiles
+                        .map(file => `
+                            <div class="file-preview-item">
+                                <span>${file.name}</span>
+                                <small class="text-muted">${formatFileSize(file.size)}</small>
+                            </div>
+                        `)
                         .join('');
                 }
             });
         });
     }
 
-    // Setup flash messages
     function setupFlashMessages() {
         setTimeout(function() {
             document.querySelectorAll('.alert').forEach(alert => {
@@ -445,32 +573,54 @@
         }, 5000);
     }
 
-    // Edit button click handler
-    function handleEditClick(button) {
-        const postId = button.getAttribute('data-id');
-        const title = button.getAttribute('data-title');
-        const content = button.getAttribute('data-content');
-
-        // Set up the edit form
-        const form = document.getElementById('editPostForm');
-        form.action = `/blog/edit/${postId}`;
-
-        // Set the title and content
-        document.getElementById('editPostTitle').value = title;
-        window.editQuill.root.innerHTML = content;
-
-        // Show the modal
-        const editModal = new bootstrap.Modal(document.getElementById('editPostModal'));
-        editModal.show();
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    // Delete confirmation handler
-    function confirmDelete(event) {
-        if (!confirm('Are you sure you want to delete this post?')) {
-            event.preventDefault();
-            return false;
+    function handleEditClick(button) {
+        try {
+            const postId = button.getAttribute('data-id');
+            const title = button.getAttribute('data-title');
+            const content = decodeHTML(button.getAttribute('data-content'));
+
+            // Set up the edit form
+            const form = document.getElementById('editPostForm');
+            form.action = `/blog/edit/${postId}`;
+
+            // Set the title
+            document.getElementById('editPostTitle').value = title;
+
+            // Clear the editor first
+            editQuill.setContents([]);
+
+            // Create a temporary div to process the content
+            const temp = document.createElement('div');
+            temp.innerHTML = content;
+
+            // Process content to ensure whitespace preservation
+            temp.querySelectorAll('p').forEach(p => {
+                p.style.whiteSpace = 'pre-wrap';
+            });
+
+            // Set the processed content
+            editQuill.root.innerHTML = temp.innerHTML;
+
+            // Show the modal
+            const editModal = new bootstrap.Modal(document.getElementById('editPostModal'));
+            editModal.show();
+        } catch (error) {
+            console.error('Error in handleEditClick:', error);
         }
-        return true;
+    }
+
+    function decodeHTML(html) {
+        const txt = document.createElement('textarea');
+        txt.innerHTML = html;
+        return txt.value;
     }
 </script>
 </body>

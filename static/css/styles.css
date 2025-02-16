@@ -52,16 +52,49 @@ p { font-size: clamp(0.8rem, 1.2vw, 0.875rem); }
 }
 
 /* Left side branding - Brain icon */
-.hero-section::before {
-    content: '\F4D3';
-    font-family: "bootstrap-icons";
+/* Hero Section with parallel left logos */
+/* Hero Section with parallel left logos */
+.hero-section::before,
+.hero-section .second-logo {
+    content: '';
     position: absolute;
-    left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    font-size: clamp(5rem, 8vw, 8rem);
-    opacity: 0.03;
-    color: var(--primary-color);
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    opacity: 0.2;
+    z-index: 1;
+    pointer-events: none;
+    filter: none;
+}
+
+.hero-section::before {
+    left: 1rem;
+    width: clamp(8rem, 12vw, 12rem);
+    height: clamp(8rem, 12vw, 12rem);
+    background-image: url(../../static/images/logo.png);
+}
+
+.hero-section .second-logo {
+    width: clamp(4rem, 6vw, 6rem); /* Half the size of the first logo */
+    height: clamp(4rem, 6vw, 6rem);
+    left: calc(1rem + clamp(8rem, 12vw, 12rem) + 0.5rem); /* Adjusted gap due to smaller size */
+    background-image: url(../../static/images/logo2.1.png);
+}
+
+/* Responsive adjustments for parallel logos */
+@media (max-width: 576px) {
+    .hero-section::before {
+        width: clamp(6rem, 8vw, 8rem);
+        height: clamp(6rem, 8vw, 8rem);
+    }
+
+    .hero-section .second-logo {
+        width: clamp(3rem, 4vw, 4rem);
+        height: clamp(3rem, 4vw, 4rem);
+        left: calc(0.5rem + clamp(6rem, 8vw, 8rem) + 0.25rem);
+    }
 }
 
 /* Right side branding - CPU icon */
