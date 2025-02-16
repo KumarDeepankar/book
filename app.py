@@ -96,23 +96,35 @@ class Post:
         return excerpt + '...' if len(words) >= 30 else excerpt
 
     def _extract_chapters(self):
-        """Extract chapters from content based on h2 headers."""
+        """Extract chapters and subheadings from content based on h2 and h3 headers."""
         soup = BeautifulSoup(self.content, 'html.parser')
         chapters = []
+        current_chapter = None
 
-        # Find all h2 elements
-        headers = soup.find_all('h2')
+        # Find all h2 and h3 elements
+        headers = soup.find_all(['h2', 'h3'])
 
         for i, header in enumerate(headers):
-            # Generate an ID for the header if it doesn't have one
-            header_id = f'chapter-{i + 1}'
-            header['id'] = header_id
-
-            chapters.append({
-                'id': header_id,
-                'title': header.get_text(),
-                'number': i + 1
-            })
+            if header.name == 'h2':
+                # This is a main chapter
+                chapter_id = f'chapter-{len(chapters) + 1}'
+                header['id'] = chapter_id
+                current_chapter = {
+                    'id': chapter_id,
+                    'title': header.get_text(),
+                    'number': len(chapters) + 1,
+                    'subheadings': []
+                }
+                chapters.append(current_chapter)
+            elif header.name == 'h3' and current_chapter:
+                # This is a subheading
+                subheading_id = f'subheading-{current_chapter["number"]}-{len(current_chapter["subheadings"]) + 1}'
+                header['id'] = subheading_id
+                current_chapter['subheadings'].append({
+                    'id': subheading_id,
+                    'title': header.get_text(),
+                    'number': len(current_chapter['subheadings']) + 1
+                })
 
         # Update the content with the modified HTML
         self.content = str(soup)

@@ -44,42 +44,6 @@
             margin-bottom: 0.25rem;
         }
 
-        /* File preview styling */
-        .file-preview {
-            background: #f8f9fa;
-            border-radius: 6px;
-            padding: 0.75rem;
-            margin-top: 1rem;
-        }
-        .custom-file-list {
-            list-style: none;
-            padding: 0;
-        }
-        .custom-file-list li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem;
-            background: #f8f9fa;
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Post actions styling */
-        .post-actions {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        /* Flash messages styling */
-        .flash-messages {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
-
         /* Enhanced editor styling */
         .modal-dialog-scrollable {
             height: 90vh;
@@ -117,27 +81,40 @@
             padding-bottom: 100px;
         }
 
+        /* Editor content styling */
+        .ql-editor h2 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #1a237e;
+            border-bottom: 2px solid rgba(13, 110, 253, 0.1);
+            padding-bottom: 0.3rem;
+        }
+
+        .ql-editor h3 {
+            font-size: 1.25em;
+            font-weight: 500;
+            margin-top: 1rem;
+            margin-bottom: 0.4rem;
+            color: #2c3e50;
+            padding-left: 0.5rem;
+        }
+
+        .ql-editor p {
+            margin-bottom: 0.4rem;
+            line-height: 1.5;
+        }
+
         .ql-editor img {
             max-width: 100%;
             height: auto;
             margin: 1em 0;
             display: block;
+            border-radius: 4px;
         }
 
-        /* Modal improvements */
-        .modal-body {
-            padding-top: 0;
-        }
-
-        .form-label {
-            position: sticky;
-            top: 0;
-            background: white;
-            padding: 10px 0;
-            margin: 0;
-            z-index: 99;
-        }
-
+        /* File upload section */
         .file-upload-section {
             position: sticky;
             bottom: 0;
@@ -147,33 +124,10 @@
             margin-top: 20px;
         }
 
-        /* Image resize modal styling */
-        .image-resize-modal .modal-body {
-            text-align: center;
-        }
-
-        .image-resize-modal img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 1rem;
-        }
-
-        .image-size-controls {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .image-size-controls input {
-            width: 100px;
-        }
-
-        .image-size-presets {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            margin-bottom: 1rem;
+        .file-preview {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
         }
 
         .file-preview-item {
@@ -181,6 +135,17 @@
             margin-bottom: 0.5rem;
             background: #f8f9fa;
             border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Flash messages */
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
         }
     </style>
 </head>
@@ -225,23 +190,15 @@
                             <h6 class="mb-2">Chapters ({{ post.chapters|length }})</h6>
                             <ul class="chapter-list">
                                 {% for chapter in post.chapters %}
-                                <li>{{ chapter.title }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}
-
-                        {% if post.files %}
-                        <div class="file-preview">
-                            <h6 class="mb-2">Attachments ({{ post.files|length }})</h6>
-                            <ul class="custom-file-list">
-                                {% for file in post.files %}
                                 <li>
-                                    <span>{{ file.filename }}</span>
-                                    <a href="{{ url_for('get_file', post_id=post.id, file_id=file.id) }}"
-                                       class="btn btn-sm btn-outline-primary">
-                                        Download
-                                    </a>
+                                    {{ chapter.title }}
+                                    {% if chapter.subheadings %}
+                                    <ul>
+                                        {% for subheading in chapter.subheadings %}
+                                        <li>{{ subheading.title }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -253,10 +210,10 @@
                            class="btn btn-sm btn-outline-secondary"
                            target="_blank">View</a>
                         <button class="btn btn-sm btn-primary"
+                                onclick="handleEditClick(this)"
                                 data-id="{{ post.id }}"
                                 data-title="{{ post.title }}"
-                                data-content="{{ post.content|e }}"
-                                onclick="handleEditClick(this)">Edit</button>
+                                data-content="{{ post.content|e }}">Edit</button>
                         <form action="{{ url_for('delete_post', post_id=post.id) }}"
                               method="POST"
                               onsubmit="return confirm('Are you sure you want to delete this post?')"
@@ -293,7 +250,7 @@
                         <div class="mb-3">
                             <label class="form-label">Content</label>
                             <small class="d-block text-muted mb-2">
-                                Use H2 headers to create chapters. Select text and click the H2 button in the toolbar.
+                                Use Heading 2 for main chapters and Heading 3 for subheadings from the format dropdown.
                             </small>
                             <div class="editor-container">
                                 <div id="editor"></div>
@@ -304,6 +261,7 @@
                             <label class="form-label">Attachments</label>
                             <input type="file" class="form-control" name="files" multiple accept=".png,.jpg,.jpeg,.gif,.pdf">
                             <small class="text-muted">Supported formats: PNG, JPG, GIF, PDF</small>
+                            <div class="file-preview"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -332,7 +290,7 @@
                         <div class="mb-3">
                             <label class="form-label">Content</label>
                             <small class="d-block text-muted mb-2">
-                                Use H2 headers to create chapters. Select text and click the H2 button in the toolbar.
+                                Use Heading 2 for main chapters and Heading 3 for subheadings from the format dropdown.
                             </small>
                             <div class="editor-container">
                                 <div id="editEditor"></div>
@@ -343,6 +301,7 @@
                             <label class="form-label">New Attachments</label>
                             <input type="file" class="form-control" name="files" multiple accept=".png,.jpg,.jpeg,.gif,.pdf">
                             <small class="text-muted">Supported formats: PNG, JPG, GIF, PDF</small>
+                            <div class="file-preview"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -353,228 +312,93 @@
             </div>
         </div>
     </div>
-
-    <!-- Image Resize Modal -->
-    <div class="modal fade image-resize-modal" id="imageResizeModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Resize Image</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <img id="imageToResize" src="" alt="Preview">
-                    <div class="image-size-presets">
-                        <button class="btn btn-outline-secondary btn-sm" data-width="320">Small (320px)</button>
-                        <button class="btn btn-outline-secondary btn-sm" data-width="640">Medium (640px)</button>
-                        <button class="btn btn-outline-secondary btn-sm" data-width="960">Large (960px)</button>
-                    </div>
-                    <div class="image-size-controls">
-                        <div>
-                            <label>Width:</label>
-                            <input type="number" id="imageWidth" class="form-control form-control-sm">
-                        </div>
-                        <div>
-                            <label>Height:</label>
-                            <input type="number" id="imageHeight" class="form-control form-control-sm">
-                        </div>
-                        <div class="form-check align-self-end">
-                            <input type="checkbox" id="maintainAspectRatio" class="form-check-input" checked>
-                            <label class="form-check-label">Maintain aspect ratio</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="applyImageResize">Apply</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.min.js"></script>
-<script>
-    // Initialize editors once DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        // Quill editor configuration
-        const quillConfig = {
-            theme: 'snow',
-            modules: {
-                toolbar: {
-                    container: [
-                        [{ 'header': [2, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote', 'code-block'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'script': 'sub'}, { 'script': 'super' }],
-                        [{ 'indent': '-1'}, { 'indent': '+1' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'align': [] }],
-                        ['link', 'image'],
-                        ['clean']
-                    ],
-                    handlers: {
-                        image: function() {
-                            const input = document.createElement('input');
-                            input.setAttribute('type', 'file');
-                            input.setAttribute('accept', 'image/*');
-                            input.click();
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Quill editor configuration
+            const toolbarOptions = [
+                [{ 'header': [false, 2, 3] }],  // Changed this line to include h3
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote', 'code-block'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'direction': 'rtl' }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'align': [] }],
+                ['link', 'image'],
+                ['clean']
+            ];
 
-                            input.onchange = () => {
-                                const file = input.files[0];
-                                if (file) {
-                                    const reader = new FileReader();
-                                    reader.onload = (e) => {
-                                        const img = new Image();
-                                        img.onload = () => {
-                                            showImageResizeModal(img, this.quill, file.type);
-                                        };
-                                        img.src = e.target.result;
-                                    };
-                                    reader.readAsDataURL(file);
-                                }
-                            };
-                        }
-                    }
-                }
-            },
-            placeholder: 'Write your post content here...'
-        };
+            const quillConfig = {
+                theme: 'snow',
+                modules: {
+                    toolbar: toolbarOptions
+                },
+                placeholder: 'Write your post content here...'
+            };
 
-        // Initialize the editors
-        window.quill = new Quill('#editor', quillConfig);
-        window.editQuill = new Quill('#editEditor', quillConfig);
+            // Initialize the editors
+            window.quill = new Quill('#editor', quillConfig);
+            window.editQuill = new Quill('#editEditor', quillConfig);
 
-        // Initialize form handlers
-        setupFormHandlers();
+            // Add custom formats
+            const headerConfig = {
+                '2': { tag: 'h2', class: 'chapter-heading' },
+                '3': { tag: 'h3', class: 'subheading' }
+            };
 
-        // Initialize auto-hide flash messages
-        setupFlashMessages();
-    });
+            // Setup form handlers
+            setupFormHandlers();
+            setupImageHandling();
+        });
 
-    // Image resize modal functionality with enhanced quality
-    function showImageResizeModal(img, quill, fileType) {
-        const modal = new bootstrap.Modal(document.getElementById('imageResizeModal'));
-        const preview = document.getElementById('imageToResize');
-        const widthInput = document.getElementById('imageWidth');
-        const heightInput = document.getElementById('imageHeight');
-        const aspectRatioCheck = document.getElementById('maintainAspectRatio');
+        function setupFormHandlers() {
+            // New post form submission
+            const newPostForm = document.getElementById('newPostForm');
+            if (newPostForm) {
+                newPostForm.onsubmit = function() {
+                    const content = window.quill.root.innerHTML;
+                    document.getElementById('hiddenContent').value = formatContent(content);
+                    return true;
+                };
+            }
 
-        const aspectRatio = img.width / img.height;
-        let originalWidth = img.width;
-        let originalHeight = img.height;
-
-        // If image is too large, scale it down while maintaining aspect ratio
-        if (originalWidth > 960) {
-            originalWidth = 960;
-            originalHeight = Math.round(originalWidth / aspectRatio);
+            // Edit post form submission
+            const editPostForm = document.getElementById('editPostForm');
+            if (editPostForm) {
+                editPostForm.onsubmit = function() {
+                    const content = window.editQuill.root.innerHTML;
+                    document.getElementById('editHiddenContent').value = formatContent(content);
+                    return true;
+                };
+            }
         }
 
-        preview.src = img.src;
-        widthInput.value = originalWidth;
-        heightInput.value = originalHeight;
+        function formatContent(content) {
+            const temp = document.createElement('div');
+            temp.innerHTML = content;
 
-        // Handle preset buttons
-        document.querySelectorAll('.image-size-presets button').forEach(button => {
-            button.onclick = () => {
-                const presetWidth = parseInt(button.dataset.width);
-                widthInput.value = presetWidth;
-                if (aspectRatioCheck.checked) {
-                    heightInput.value = Math.round(presetWidth / aspectRatio);
-                }
-            };
-        });
+            // Process all h2 elements (chapters)
+            temp.querySelectorAll('h2').forEach((h2, index) => {
+                h2.id = `chapter-${index + 1}`;
+                h2.classList.add('chapter-heading');
+            });
 
-        // Handle dimension inputs
-        widthInput.oninput = () => {
-            if (aspectRatioCheck.checked) {
-                heightInput.value = Math.round(widthInput.value / aspectRatio);
-            }
-        };
+            // Process all h3 elements (subheadings)
+            temp.querySelectorAll('h3').forEach((h3, index) => {
+                const parentChapter = h3.closest('h2');
+                const chapterIndex = Array.from(temp.querySelectorAll('h2')).indexOf(parentChapter) + 1;
+                h3.id = `subheading-${chapterIndex}-${index + 1}`;
+                h3.classList.add('subheading');
+            });
 
-        heightInput.oninput = () => {
-            if (aspectRatioCheck.checked) {
-                widthInput.value = Math.round(heightInput.value * aspectRatio);
-            }
-        };
+            return temp.innerHTML;
+        }
 
-        // Handle apply button with enhanced quality preservation
-        document.getElementById('applyImageResize').onclick = () => {
-            const width = parseInt(widthInput.value);
-            const height = parseInt(heightInput.value);
-
-            // Create a high-resolution canvas with 2x dimensions for better quality
-            const canvas = document.createElement('canvas');
-            const scaleFactor = 2; // Increase this for even higher quality if needed
-            canvas.width = width * scaleFactor;
-            canvas.height = height * scaleFactor;
-
-            const ctx = canvas.getContext('2d');
-
-            // Enable image smoothing for better quality
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-
-            // Clear the canvas with a white background
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw the image with proper scaling
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            // Create a second canvas for the final size
-            const outputCanvas = document.createElement('canvas');
-            outputCanvas.width = width;
-            outputCanvas.height = height;
-            const outputCtx = outputCanvas.getContext('2d');
-
-            // Enable image smoothing for the final resize
-            outputCtx.imageSmoothingEnabled = true;
-            outputCtx.imageSmoothingQuality = 'high';
-
-            // Draw the high-res canvas onto the output canvas
-            outputCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height,
-                               0, 0, width, height);
-
-            // Get the resized image as a data URL with maximum quality
-            let resizedImageUrl;
-            if (fileType && fileType.includes('image/jpeg')) {
-                resizedImageUrl = outputCanvas.toDataURL('image/jpeg', 1.0);
-            } else {
-                // For PNG and other formats, use PNG to avoid quality loss
-                resizedImageUrl = outputCanvas.toDataURL('image/png');
-            }
-
-            // Insert resized image
-            const range = quill.getSelection(true);
-            quill.insertEmbed(range.index, 'image', resizedImageUrl);
-
-            // Update cursor position
-            quill.setSelection(range.index + 1);
-
-            modal.hide();
-        };
-
-        modal.show();
-    }
-
-    // Helper function to ensure proper header formatting
-    function formatContent(content) {
-        const temp = document.createElement('div');
-        temp.innerHTML = content;
-
-        // Process all h2 elements (chapters)
-        temp.querySelectorAll('h2').forEach((h2, index) => {
-            h2.id = `chapter-${index + 1}`;
-            h2.classList.add('chapter-heading');
-        });
-
-        return temp.innerHTML;
-    }
 
     // Setup form handlers
     function setupFormHandlers() {
