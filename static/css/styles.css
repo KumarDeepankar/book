@@ -53,13 +53,11 @@ p { font-size: clamp(0.8rem, 1.2vw, 0.875rem); }
 
 /* Left side branding - Brain icon */
 /* Hero Section with parallel left logos */
-/* Hero Section with parallel left logos */
+/* Hero Section logos */
 .hero-section::before,
 .hero-section .second-logo {
     content: '';
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
@@ -71,32 +69,55 @@ p { font-size: clamp(0.8rem, 1.2vw, 0.875rem); }
 
 .hero-section::before {
     left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
     width: clamp(8rem, 12vw, 12rem);
     height: clamp(8rem, 12vw, 12rem);
     background-image: url(../../static/images/logo.png);
 }
 
 .hero-section .second-logo {
-    width: clamp(4rem, 6vw, 6rem); /* Half the size of the first logo */
+    left: calc(1rem + clamp(8rem, 12vw, 12rem) + 2rem); /* Increased spacing between logos */
+    width: clamp(4rem, 6vw, 6rem);
     height: clamp(4rem, 6vw, 6rem);
-    left: calc(1rem + clamp(8rem, 12vw, 12rem) + 0.5rem); /* Adjusted gap due to smaller size */
     background-image: url(../../static/images/logo2.1.png);
+    top: 50%;
+    transform: translateY(-50%);
 }
 
-/* Responsive adjustments for parallel logos */
-@media (max-width: 576px) {
+/* Responsive adjustments for stacked logos */
+@media (max-width: 768px) {
+    .hero-section::before,
+    .hero-section .second-logo {
+        left: 1.5rem; /* Same left alignment for both logos */
+    }
+
     .hero-section::before {
+        top: 25%;
+        transform: translateY(-25%);
         width: clamp(6rem, 8vw, 8rem);
         height: clamp(6rem, 8vw, 8rem);
     }
 
     .hero-section .second-logo {
+        top: 45%;
+        transform: translateY(-45%);
         width: clamp(3rem, 4vw, 4rem);
         height: clamp(3rem, 4vw, 4rem);
-        left: calc(0.5rem + clamp(6rem, 8vw, 8rem) + 0.25rem);
     }
 }
 
+@media (max-width: 576px) {
+    .hero-section::before {
+        top: 20%;
+        transform: translateY(-20%);
+    }
+
+    .hero-section .second-logo {
+        top: 40%;
+        transform: translateY(-40%);
+    }
+}
 /* Right side branding - CPU icon */
 .hero-section::after {
     content: '\F3FD';

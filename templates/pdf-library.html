@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
          /* Base styles for both libraries */
+/* Base styles for both libraries */
 body {
     background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
     min-height: 100vh;
@@ -50,15 +51,6 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-.filter-section h5::before {
-    content: '';
-    display: block;
-    width: 12px;
-    height: 2px;
-    background: currentColor;
-    opacity: 0.5;
 }
 
 /* Filter Groups */
@@ -174,37 +166,11 @@ body {
     background: rgba(59, 130, 246, 0.15);
 }
 
-/* Responsive Adjustments */
-@media (min-width: 992px) {
-    .filter-section {
-        max-width: 280px;
-    }
-}
-
-@media (max-width: 991.98px) {
-    .filter-section {
-        position: relative;
-        top: 0;
-        max-width: none;
-        margin-bottom: 2rem;
-    }
-
-    .filter-group {
-        margin-bottom: 0.75rem;
-    }
-}
-
 /* Resource Grid Layout */
 .resource-grid {
     display: grid;
     gap: 1.5rem;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-}
-
-@media (max-width: 640px) {
-    .resource-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* Animation for Filter Changes */
@@ -260,6 +226,39 @@ body {
     bottom: 0;
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(2px);
+}
+
+/* Responsive Adjustments */
+@media (min-width: 992px) {
+    .filter-section {
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .filter-section {
+        position: relative;
+        top: 0;
+        max-width: none;
+        margin-bottom: 2rem;
+    }
+
+    .filter-group {
+        margin-bottom: 0.75rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .resource-grid {
+        grid-template-columns: 1fr;
+    }
+}
+        /* Footer Styles */
+footer {
+    background: white;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    margin-top: 4rem;
+    padding: 1.5rem 0;
 }
     </style>
 </head>
@@ -480,7 +479,12 @@ body {
             </div>
         </div>
     </div>
-
+        <!-- Footer -->
+<footer>
+    <div class="container text-center">
+        <p class="text-muted mb-0">&copy; 2025 Kumar Deepankar. All rights reserved.</p>
+    </div>
+</footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
