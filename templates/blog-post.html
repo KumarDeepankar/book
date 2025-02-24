@@ -6,8 +6,77 @@
     <title>{{ post.title }} - Kumar Deepankar</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
-</head>
-<body>
+    <!-- Add Prism.js CSS for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet">
+    <style>
+        /* Additional code block styling */
+        .blog-content pre {
+            background-color: #f5f7f9;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .blog-content code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9em;
+            background-color: rgba(0, 0, 0, 0.04);
+            border-radius: 3px;
+            padding: 0.2em 0.4em;
+        }
+
+        .blog-content pre > code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 0.9rem;
+            color: #333;
+            display: block;
+            tab-size: 2;
+        }
+
+        /* Code language badge */
+        pre[data-language]::before {
+            content: attr(data-language);
+            position: absolute;
+            top: 0;
+            right: 0;
+            color: #232323;
+            font-size: 0.7rem;
+            padding: 0.3rem 0.6rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            background: #e0e0e0;
+            border-radius: 0 3px 0 3px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* Line numbers styling */
+        .line-numbers .line-numbers-rows {
+            border-right: 2px solid rgba(0, 0, 0, 0.1);
+            padding-right: 0.5rem;
+        }
+
+        /* Copy button */
+        .code-toolbar > .toolbar {
+            opacity: 1;
+            top: 0.2rem;
+            right: 4rem;
+        }
+
+        .code-toolbar > .toolbar > .copy-to-clipboard-button {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: #f0f0f0;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
 <!-- Update the navbar section in blog-post.html -->
@@ -82,9 +151,20 @@
             <div class="col-lg-9 order-lg-1">
                 <article class="blog-content">
                     {{ post.content|safe }}
+
+
                 </article>
             </div>
         </div>
+        <!-- Add this right after your article tag opens -->
+<article class="blog-content">
+    {{ post.content|safe }}
+
+    <!-- Test code block - Remove after confirming it works -->
+    <pre class="language-python line-numbers" data-language="python"><code class="language-python">def hello_world():
+    print("Hello, world!")
+    return True</code></pre>
+</article>
     </main>
 
     <footer class="py-4">
@@ -94,8 +174,22 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Add Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/plugins/toolbar/prism-toolbar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Debug Prism.js loading
+            console.log("Prism loaded:", typeof Prism !== 'undefined');
+
+            // Debug code blocks
+            const codeBlocks = document.querySelectorAll('pre code');
+            console.log("Found code blocks:", codeBlocks.length);
+
             // Setup IntersectionObserver for table of contents highlighting
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -132,10 +226,76 @@
                 });
             });
 
-            // Process any pre-formatted text to ensure proper spacing
-            document.querySelectorAll('.blog-content p, .blog-content pre, .blog-content code').forEach(element => {
-                element.style.whiteSpace = 'pre-wrap';
+            // Manually process code blocks in case they're not properly formatted
+            document.querySelectorAll('pre').forEach(preBlock => {
+                // Ensure pre block has the right classes
+                if (!preBlock.classList.contains('line-numbers')) {
+                    preBlock.classList.add('line-numbers');
+                }
+
+                // Check if it has a language class, if not add a default
+                let hasLanguageClass = false;
+                preBlock.classList.forEach(cls => {
+                    if (cls.startsWith('language-')) hasLanguageClass = true;
+                });
+
+                if (!hasLanguageClass) {
+                    preBlock.classList.add('language-plaintext');
+                }
+
+                // Extract the language from class
+                let language = 'plaintext';
+                preBlock.classList.forEach(cls => {
+                    if (cls.startsWith('language-')) {
+                        language = cls.replace('language-', '');
+                    }
+                });
+
+                // Add data-language attribute
+                if (!preBlock.hasAttribute('data-language')) {
+                    preBlock.setAttribute('data-language', language);
+                }
+
+                // Check if pre contains a code element, if not, add one
+                if (!preBlock.querySelector('code')) {
+                    const content = preBlock.innerHTML;
+                    const codeElem = document.createElement('code');
+                    codeElem.innerHTML = content;
+                    codeElem.className = Array.from(preBlock.classList)
+                        .filter(cls => cls.startsWith('language-'))
+                        .join(' ');
+
+                    preBlock.innerHTML = '';
+                    preBlock.appendChild(codeElem);
+                } else {
+                    // Ensure the code element has the right language class
+                    const codeElem = preBlock.querySelector('code');
+                    if (!codeElem.className.includes('language-')) {
+                        codeElem.className = Array.from(preBlock.classList)
+                            .filter(cls => cls.startsWith('language-'))
+                            .join(' ');
+                    }
+                }
+
+                console.log("Processed pre block:", preBlock.outerHTML.substring(0, 100) + "...");
             });
+
+            // Force Prism to highlight all code blocks
+            if (window.Prism) {
+                console.log("Running Prism.highlightAll()");
+                Prism.highlightAll();
+            } else {
+                console.error("Prism not loaded!");
+
+                // Try to load Prism dynamically as a fallback
+                const prismScript = document.createElement('script');
+                prismScript.src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/prism.min.js";
+                prismScript.onload = function() {
+                    console.log("Prism loaded dynamically");
+                    Prism.highlightAll();
+                };
+                document.head.appendChild(prismScript);
+            }
         });
     </script>
 </body>
